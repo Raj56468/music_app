@@ -2,6 +2,9 @@ const play = document.getElementById('play');
 const progressBar = document.getElementById('progressBar');
 const audio = new Audio('assets/song-1.mp3');
 let Playlist = Array.from(document.querySelectorAll('.playlist'));
+let randomPlaylist = [];
+let currentPlaylistIndex = 0;
+let currentSong = 0;
 
 MakeAllPlay = () => {
     Playlist.forEach((element) => {
@@ -50,4 +53,78 @@ progressBar.addEventListener('input', function () {
     let value = this.value;
     this.style.background = `linear-gradient(to right, #21a600ff ${value}%, #333 ${value}%)`;
     audio.currentTime = (progressBar.value * audio.duration) / 100;
+});
+
+playNextSong = () => {
+    const activePlaylist = isShuffle ? randomPlaylist : Playlist
+    if (currentPlaylistIndex < activePlaylist.length - 1) {
+        currentPlaylistIndex++;
+    } elseif (currentPlaylistIndex === activePlaylist.length - 1) 
+        currentPlaylistIndex = 0;
+
+    currentSong = activePlaylist[currentPlaylistIndex];
+    audio.src = `assets/${currentSong}.mp3`;
+    audio.currentTime = 0;
+    audio.play();
+}
+
+SongEnd = () => {
+    audio.addEventListener('ended', () => {
+        playNextSong();
+    })
+}
+
+prevSong = () => {
+    let prevsong = (currentSong -1);
+    currentSong = prevsong == 0 ? Playlist.length : prevsong;
+    audio.src = `assets/${currentSong}.mp3`;
+    audio.currentTime = 0;
+    audio.play();
+}
+
+forward.addEventListener('click', () => {
+    playNextSong();
+});
+
+backward.addEventListener('click', () => {
+    prevSong();
+});
+
+repeatSongs = () => {
+    currentSong = currentSong;
+    audio.src = `assets/${currentSong}.mp3`;
+    audio.currentTime = 0;
+    audio.play();
+}
+
+repeat.addEventListener('click', () => {
+    repeatSongs();
+});
+
+generateShufflePlaylist = () => {
+    const pool = []
+    for (let i = 1; i <= 19; i++) {
+        pool.push(i);
+    }
+
+    for(let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+     
+    return pool;
+}
+
+shuffleSongs = () => {
+    isShuffle = true;
+    randomPlaylist = generateShufflePlaylist();
+    currentPlaylistIndex = 0;
+    currentSong = randomPlaylist[currentPlaylistIndex];
+    audio.src = `assets/${currentSong}.mp3`;
+    audio.currentTime = 0;
+    audio.play();
+}
+
+shuffle.addEventListener('click', () => {
+    shuffleSongs();
 });
